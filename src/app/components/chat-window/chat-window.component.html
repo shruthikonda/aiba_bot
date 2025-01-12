@@ -1,0 +1,82 @@
+<div class="chat-window">
+  <div class="chat-header">
+    <div class="header-content">
+      <div class="bot-avatar">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E" alt="ChatBot" />
+      </div>
+      <div class="bot-info">
+        <h3>{{ botName }}</h3>
+        <span class="status">
+          <span class="status-dot" [class.offline]="systemError"></span>
+          {{ systemError ? 'Offline' : 'Online' }}
+        </span>
+      </div>
+    </div>
+    <button class="close-button" (click)="toggleChat.emit()">×</button>
+  </div>
+  
+  <div #messagesContainer class="messages-container">
+    <ng-container *ngIf="systemError">
+      <div class="system-error">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+        <h3>System Under Maintenance</h3>
+        <p>We're currently performing some updates to improve your experience. Please try again later.</p>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!systemError">
+      <ng-container *ngIf="!userInfo && messages.length === 0">
+        <div class="registration-form">
+          <h3>Welcome! 👋</h3>
+          <p>Please enter your details to start chatting</p>
+          <form (ngSubmit)="registerUser()">
+            <div class="form-group">
+              <input
+                type="text"
+                [(ngModel)]="tempUserInfo.name"
+                name="name"
+                placeholder="Your Name"
+                required
+                class="form-input"
+              />
+            </div>
+            <div class="form-group">
+              <input
+                type="email"
+                [(ngModel)]="tempUserInfo.email"
+                name="email"
+                placeholder="Your Email"
+                required
+                class="form-input"
+                [class.error]="emailError"
+              />
+              <span class="error-message" *ngIf="emailError">{{ emailError }}</span>
+            </div>
+            <button type="submit" class="submit-button">Start Chatting</button>
+          </form>
+        </div>
+      </ng-container>
+      <app-chat-message
+        *ngFor="let message of messages"
+        [message]="message"
+      ></app-chat-message>
+      <div *ngIf="messages.length > 0 && !chatEnded" class="end-chat-container">
+        <button class="end-chat-link" (click)="endChat()">end chat</button>
+      </div>
+    </ng-container>
+  </div>
+
+  <app-chat-input 
+    *ngIf="(userInfo || messages.length > 0) && !systemError && !chatEnded"
+    [disabled]="isLoading"
+    (send)="onSendMessage($event)"
+  ></app-chat-input>
+
+  <div class="powered-by">
+    <a href="https://www.integrifyai.com" target="_blank" rel="noopener noreferrer">
+      ⚡ Powered by IntegrifyAI
+    </a>
+  </div>
+</div>
